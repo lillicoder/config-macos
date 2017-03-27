@@ -3,8 +3,8 @@ config-osx
 
 Collection of various configuration scripts, profiles, and so on (OSX environment)
 
-All .itermcolors files are intended for use with [iTerm2] (http://iterm2.com/). I highly
-recommend the excellent [iTerm2 Color Schemes repository] (https://github.com/mbadolato/iTerm2-Color-Schemes) 
+All .itermcolors files are intended for use with [iTerm2](http://iterm2.com/). I highly
+recommend the excellent [iTerm2 Color Schemes repository](https://github.com/mbadolato/iTerm2-Color-Schemes) 
 for finding nice looking color palettes for iTerm2.
 
 License
