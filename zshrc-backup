@@ -1,0 +1,119 @@
+export GIT_EDITOR=nano
+export GRADLE_HOME=/usr/local/bin
+export HOMEBREW_EDITOR="nano"
+​
+################
+# POWERLEVEL9K #
+################
+​
+source /usr/local/opt/powerlevel9k/powerlevel9k.zsh-theme
+POWERLEVEL9K_LEFT_PROMPT_ELEMENTS=(user dir vcs)
+POWERLEVEL9K_RIGHT_PROMPT_ELEMENTS=()
+POWERLEVEL9K_SHORTEN_STRATEGY='truncate_to_last'
+​
+###########
+# ANDROID #
+###########
+​
+# Shortcut for adb shell screenrecord
+screencap() {
+    adb shell screenrecord /sdcard/screencap.mp4
+}
+​
+#######
+# GIT #
+#######
+​
+git-branch-all() {
+    for remote in `git branch -r | grep -v /HEAD`; do git checkout --track $remote ; done
+}
+​
+##########
+# GRADLE #
+##########
+​
+kill-gradle-daemons() {
+	pkill -f '.*GradleDaemon.*'
+}
+
+########
+# MISC #
+########
+​
+# Restarts ADB
+adb-restart() {
+    adb kill-server
+    adb start-server
+}
+​
+# Backups existing homebrew config to a runnable script
+# see https://gist.githubusercontent.com/lillicoder/032ea23a1c1e12f87686/raw/2376b4d620c91c532b2f8e57ab7b8259377f2e86/brew_backup.sh
+brew-backup() {
+    local file="brew_restore.sh"
+​
+    if [ -f "$file" ]
+    then
+        read -p "Backup file $file already exists, remove previous backup (y/n)? " -n 1 -r removeReply
+        echo
+​
+        if [ "$removeReply" = "Y" -o "$removeReply" = "y" ]
+        then
+            rm -f $file
+        else
+            exit
+        fi
+    fi
+​
+    touch "$file"
+    echo "Starting backup..."
+​
+    echo '#!/bin/bash' >> $file
+    echo '' >> $file
+    echo 'failed_items=""' >> $file
+    echo 'function install_package() {' >> $file
+    echo 'echo EXECUTING: brew install $1 $2' >> $file
+    echo 'brew install $1 $2' >> $file
+    echo '[ $? -ne 0 ] && $failed_items="$failed_items $1" # package failed to install.' >> $file
+    echo '}' >> $file
+​
+    echo
+    echo "Processing taps..."
+    brew tap | while read tap;
+    do
+        echo "brew tap $tap" >> $file
+        echo "Backed up $tap"
+    done
+​
+    echo
+    echo "Processing packages..."
+    brew list | while read item;
+    do
+        echo "install_package $item '$(brew info $item | /usr/bin/grep 'Built from source with:' | /usr/bin/sed 's/^[ \t]*Built from source with:/ /g; s/\,/ /g')'" >> $file
+        echo "Backed up $item"
+    done
+​
+    echo '[ ! -z $failed_items ] && echo The following items failed to install: && echo $failed_items' >> $file
+​
+    echo
+    echo "Homebrew configuration backed up to $file"
+​
+    if [ ! -z "$failed_items"]
+    then
+        echo "The following items failed to install: $failed_items"
+    fi
+}
+​
+# Alias for scrcpy at a universally working resolution
+eye() {
+    scrcpy -m 1200
+}
+​
+# Alias for ls -la
+ll() {
+    if [ -n $1 ]
+    then
+        ls -la $1
+    else
+        ls -la
+    fi
+}
